@@ -2,9 +2,12 @@
 # the open-source pygame library
 # throughout this file
 import pygame
+import sys
+from asteroid import *
 from constants import *
 from player import *
 from circleshape import *
+from asteroidfield import *
 
 def main() :
     pygame.init()
@@ -20,10 +23,16 @@ def main() :
 
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
+    asteroids = pygame.sprite.Group()
+    shots = pygame.sprite.Group()  
 
     Player.containers = (updatable, drawable)
+    Asteroid.containers = (asteroids, updatable, drawable)
+    AsteroidField.containers = (updatable,)
+    Shot.containers = (updatable, drawable)
 
-    player = Player(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
+    player = Player(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, shots)
+    asteroid_field = AsteroidField()
 
     while True:
         for event in pygame.event.get():
@@ -33,6 +42,17 @@ def main() :
         screen.fill((0, 0, 0))
 
         updatable.update(dt)
+
+        for asteroid in asteroids:
+            if asteroid.checkCollisions(player) == True :
+                print("Game over!")
+                sys.exit()
+
+            for asteroid in asteroids:
+                for shot in shots:
+                    if asteroid.checkCollisions(shot) == True :
+                        asteroid.split()
+
         for item in drawable:
             item.draw(screen)
     
